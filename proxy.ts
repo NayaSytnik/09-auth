@@ -22,12 +22,23 @@ export async function proxy(request: NextRequest) {
 
   let hasValidSession = !!accessToken;
 
+  const response = NextResponse.next();
+
   if (!accessToken && refreshToken) {
     try {
-      const session = await checkSession();
+      const res = await checkSession();
 
-      if (session) {
+
+      if (res?.data) {
         hasValidSession = true;
+
+        const setCookie = res.headers['set-cookie'];
+
+        if (setCookie) {
+          setCookie.forEach((cookie) => {
+            response.headers.append('set-cookie', cookie);
+          });
+        }
       }
     } catch {
       hasValidSession = false;
@@ -42,7 +53,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/profile', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
