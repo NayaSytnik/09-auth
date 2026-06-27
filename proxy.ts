@@ -28,7 +28,6 @@ export async function proxy(request: NextRequest) {
     try {
       const res = await checkSession();
 
-
       if (res?.data) {
         hasValidSession = true;
 
@@ -45,12 +44,14 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+
   if (!hasValidSession && isPrivateRoute) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
+
   if (hasValidSession && isPublicRoute) {
-    return NextResponse.redirect(new URL('/profile', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return response;
