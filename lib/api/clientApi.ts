@@ -15,19 +15,19 @@ export interface FetchNotesParams {
   tag?: string;
 }
 
-interface AuthCredentials {
+interface AuthData {
   email: string;
   password: string;
 }
 
-interface UpdateUserData {
+interface UpdateMeData {
   username: string;
 }
 
 export const fetchNotes = async (
   params: FetchNotesParams,
 ): Promise<FetchNotesResponse> => {
-  const { data } = await api.get<FetchNotesResponse>('/notes', {
+  const { data } = await api.get('/notes', {
     params,
   });
 
@@ -35,44 +35,35 @@ export const fetchNotes = async (
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const { data } = await api.get<Note>(`/notes/${id}`);
+  const { data } = await api.get(`/notes/${id}`);
+
   return data;
 };
 
-export const createNote = async (
-  note: {
-    title: string;
-    content: string;
-    tag: NoteTag;
-  },
-): Promise<Note> => {
-  const { data } = await api.post<Note>('/notes', note);
+export const createNote = async (note: {
+  title: string;
+  content: string;
+  tag: NoteTag;
+}): Promise<Note> => {
+  const { data } = await api.post('/notes', note);
+
   return data;
 };
 
 export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<Note>(`/notes/${id}`);
-  return data;
-};
-
-export const register = async (
-  credentials: AuthCredentials,
-): Promise<User> => {
-  const { data } = await api.post<User>(
-    '/auth/register',
-    credentials,
-  );
+  const { data } = await api.delete(`/notes/${id}`);
 
   return data;
 };
 
-export const login = async (
-  credentials: AuthCredentials,
-): Promise<User> => {
-  const { data } = await api.post<User>(
-    '/auth/login',
-    credentials,
-  );
+export const register = async (body: AuthData): Promise<User> => {
+  const { data } = await api.post('/auth/register', body);
+
+  return data;
+};
+
+export const login = async (body: AuthData): Promise<User> => {
+  const { data } = await api.post('/auth/login', body);
 
   return data;
 };
@@ -82,22 +73,21 @@ export const logout = async (): Promise<void> => {
 };
 
 export const checkSession = async (): Promise<User | null> => {
-  const { data } = await api.get<User | null>('/auth/session');
-  return data;
+  const { data } = await api.get('/auth/session');
+
+  return data ?? null;
 };
 
 export const getMe = async (): Promise<User> => {
-  const { data } = await api.get<User>('/users/me');
+  const { data } = await api.get('/users/me');
+
   return data;
 };
 
 export const updateMe = async (
-  body: UpdateUserData,
+  body: UpdateMeData,
 ): Promise<User> => {
-  const { data } = await api.patch<User>(
-    '/users/me',
-    body,
-  );
+  const { data } = await api.patch('/users/me', body);
 
   return data;
 };

@@ -1,50 +1,32 @@
 import type { Metadata } from 'next';
-import { Roboto } from 'next/font/google';
+import { ReactNode } from 'react';
 
 import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
+import AuthProvider from '@/components/AuthProvider/AuthProvider';
 import Header from '@/components/Header/Header';
-import Footer from '@/components/Footer/Footer';
 
-const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-roboto',
-  display: 'swap',
-});
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'NoteHub',
-  description: 'Application for creating, searching and managing notes.',
-  openGraph: {
-    title: 'NoteHub',
-    description: 'Application for creating, searching and managing notes.',
-    url: 'https://notehub.com/',
-    images: [
-      {
-        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'NoteHub',
-      },
-    ],
-  },
+  description: 'NoteHub application',
 };
 
-export default function RootLayout({
-  children,
-  modal,
-}: Readonly<{
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}>) {
+type Props = {
+  children: ReactNode;
+  modal: ReactNode;
+};
+
+export default function RootLayout({ children, modal }: Props) {
   return (
     <html lang="en">
-      <body className={roboto.variable}>
+      <body>
         <TanStackProvider>
-          <Header />
-          {children}
-          {modal}
-          <Footer />
+          <AuthProvider>
+            <Header />
+            {children}
+            {modal}
+          </AuthProvider>
         </TanStackProvider>
       </body>
     </html>
