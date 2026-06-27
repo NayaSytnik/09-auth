@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
+import { checkSession } from '@/lib/api/serverApi';
 
 const privateRoutes = ['/profile', '/notes'];
 const publicRoutes = ['/sign-in', '/sign-up'];
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const accessToken = request.cookies.get('accessToken')?.value;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  const refreshToken = cookieStore.get('refreshToken')?.value;
 
   const isPrivateRoute = privateRoutes.some((route) =>
     pathname.startsWith(route)
@@ -17,19 +20,30 @@ export function proxy(request: NextRequest) {
     pathname.startsWith(route)
   );
 
+  let hasValidSession = !!accessToken;
 
-  if (!accessToken && isPrivateRoute) {
+  if (!accessToken && refreshToken) {
+    try {
+      const session = await checkSession();
+
+      if (session) {
+        hasValidSession = true;
+      }
+    } catch {
+      hasValidSession = false;
+    }
+  }
+
+  if (!hasValidSession && isPrivateRoute) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
-
-  if (accessToken && isPublicRoute) {
+  if (hasValidSession && isPublicRoute) {
     return NextResponse.redirect(new URL('/profile', request.url));
   }
 
   return NextResponse.next();
 }
-
 
 export const config = {
   matcher: ['/profile/:path*', '/notes/:path*', '/sign-in', '/sign-up'],
